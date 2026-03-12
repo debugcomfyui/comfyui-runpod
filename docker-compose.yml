@@ -1,0 +1,25 @@
+services:
+  comfyui:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: senseiai/comfyui-runpod:latest
+    ports:
+      - "8188:8188"
+      - "8888:8888"
+      - "2222:22"
+    volumes:
+      - ./runpod-volume:/runpod-volume
+    environment:
+      - ENABLE_JUPYTER=true
+      - JUPYTER_TOKEN=comfyui
+      - AUTO_UPDATE=false
+      - SSH_PASSWORD=password123
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    restart: unless-stopped

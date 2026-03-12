@@ -1,0 +1,15 @@
+# Local model storage (don't commit huge model files)
+runpod-volume/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+
+# Docker
+.dockerignore
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,14 @@
+runpod_volume:
+  base_path: /runpod-volume/ComfyUI/
+  checkpoints: models/checkpoints/
+  vae: models/vae/
+  loras: models/loras/
+  controlnet: models/controlnet/
+  embeddings: models/embeddings/
+  upscale_models: models/upscale_models/
+  clip: models/clip/
+  clip_vision: models/clip_vision/
+  unet: models/unet/
+  diffusion_models: models/diffusion_models/
+  text_encoders: models/text_encoders/
+  ipadapter: models/ipadapter/
