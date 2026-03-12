@@ -16,7 +16,6 @@ COMFYUI_EXTRA_ARGS=${COMFYUI_EXTRA_ARGS:-"--listen 0.0.0.0"}
 
 source $VENV/bin/activate
 export PATH="$VENV/bin:$PATH"
-export PATH="$VENV/bin:$PATH"
 
 # ── Network volume symlinks ───────────────────────────────────
 if [ -d "/runpod-volume" ]; then
@@ -60,7 +59,7 @@ LORA_DIR=$COMFYUI_PATH/models/loras
 
 if [ ! -f "$DIFFUSION_DIR/z_image_turbo_bf16.safetensors" ]; then
     echo ">>> Downloading z_image_turbo_bf16.safetensors (~12GB)..."
-    $VENV/bin/huggingface-cli download Comfy-Org/z_image_turbo \
+    python -m huggingface_hub download Comfy-Org/z_image_turbo \
         split_files/diffusion_models/z_image_turbo_bf16.safetensors \
         --local-dir /tmp/z_image_turbo
     mv /tmp/z_image_turbo/split_files/diffusion_models/z_image_turbo_bf16.safetensors \
@@ -72,7 +71,7 @@ fi
 
 if [ ! -f "$TEXT_ENC_DIR/qwen_3_4b.safetensors" ]; then
     echo ">>> Downloading qwen_3_4b.safetensors (~8GB)..."
-    $VENV/bin/huggingface-cli download Comfy-Org/z_image_turbo \
+    python -m huggingface_hub download Comfy-Org/z_image_turbo \
         split_files/text_encoders/qwen_3_4b.safetensors \
         --local-dir /tmp/z_image_turbo_te
     mv /tmp/z_image_turbo_te/split_files/text_encoders/qwen_3_4b.safetensors \
@@ -84,7 +83,7 @@ fi
 
 if [ ! -f "$UPSCALE_DIR/4xLSDIR.pth" ]; then
     echo ">>> Downloading 4xLSDIR.pth (~67MB)..."
-    $VENV/bin/huggingface-cli download Chaewon1/upscale_models \
+    python -m huggingface_hub download Chaewon1/upscale_models \
         4xLSDIR.pth \
         --local-dir /tmp/upscale
     mv /tmp/upscale/4xLSDIR.pth $UPSCALE_DIR/4xLSDIR.pth
@@ -124,22 +123,6 @@ if [ "$AUTO_UPDATE" = "true" ]; then
     echo ">>> Updating ComfyUI..."
     cd $COMFYUI_PATH && git pull origin master
     uv pip install -r requirements.txt --quiet
-    cd $COMFYUI_PATH/custom_nodes/ComfyUI-Manager && git pull
-    uv pip install -r requirements.txt --quiet 2>/dev/null || true
-fi
-
-# ── Custom nodes from env var ────────────────────────────────
-if [ ! -z "$CUSTOM_NODES" ]; then
-    echo ">>> Installing custom nodes..."
-    IFS=',' read -ra NODES <<< "$CUSTOM_NODES"
-    for node_url in "${NODES[@]}"; do
-        node_name=$(basename $node_url)
-        node_path="$COMFYUI_PATH/custom_nodes/$node_name"
-        if [ ! -d "$node_path" ]; then
-            git clone "$node_url" "$node_path"
-            [ -f "$node_path/requirements.txt" ] && uv pip install -r "$node_path/requirements.txt" --quiet
-        fi
-    done
 fi
 
 # ── SSH ───────────────────────────────────────────────────────
