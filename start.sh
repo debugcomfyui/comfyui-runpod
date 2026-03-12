@@ -16,6 +16,7 @@ COMFYUI_EXTRA_ARGS=${COMFYUI_EXTRA_ARGS:-"--listen 0.0.0.0"}
 
 source $VENV/bin/activate
 export PATH="$VENV/bin:$PATH"
+export PATH="$VENV/bin:$PATH"
 
 # ── Network volume symlinks ───────────────────────────────────
 if [ -d "/runpod-volume" ]; then
