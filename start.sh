@@ -61,7 +61,7 @@ LORA_DIR=$COMFYUI_PATH/models/loras
 # z_image_turbo_bf16.safetensors
 if [ ! -f "$DIFFUSION_DIR/z_image_turbo_bf16.safetensors" ]; then
     echo ">>> Downloading z_image_turbo_bf16.safetensors (~12GB)..."
-    huggingface-cli download Comfy-Org/z_image_turbo \
+    $VENV/bin/huggingface-cli download Comfy-Org/z_image_turbo \
         split_files/diffusion_models/z_image_turbo_bf16.safetensors \
         --local-dir /tmp/z_image_turbo
     mv /tmp/z_image_turbo/split_files/diffusion_models/z_image_turbo_bf16.safetensors \
@@ -74,7 +74,7 @@ fi
 # qwen_3_4b.safetensors
 if [ ! -f "$TEXT_ENC_DIR/qwen_3_4b.safetensors" ]; then
     echo ">>> Downloading qwen_3_4b.safetensors (~8GB)..."
-    huggingface-cli download Comfy-Org/z_image_turbo \
+    $VENV/bin/huggingface-cli download Comfy-Org/z_image_turbo \
         split_files/text_encoders/qwen_3_4b.safetensors \
         --local-dir /tmp/z_image_turbo_te
     mv /tmp/z_image_turbo_te/split_files/text_encoders/qwen_3_4b.safetensors \
@@ -87,7 +87,7 @@ fi
 # 4xLSDIR.pth
 if [ ! -f "$UPSCALE_DIR/4xLSDIR.pth" ]; then
     echo ">>> Downloading 4xLSDIR.pth (~67MB)..."
-    huggingface-cli download Chaewon1/upscale_models \
+    $VENV/bin/huggingface-cli download Chaewon1/upscale_models \
         4xLSDIR.pth \
         --local-dir /tmp/upscale
     mv /tmp/upscale/4xLSDIR.pth $UPSCALE_DIR/4xLSDIR.pth
