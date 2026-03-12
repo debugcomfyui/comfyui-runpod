@@ -52,15 +52,51 @@ RUN uv pip install \
     aiohttp einops transformers>=4.28.1 safetensors>=0.4.2 \
     accelerate pyyaml Pillow scipy tqdm psutil kornia spandrel \
     soundfile hf_transfer huggingface_hub jupyterlab ipywidgets \
-    runpod requests GitPython packaging omegaconf
+    runpod requests GitPython packaging omegaconf \
+    opencv-python-headless matplotlib
 
 RUN git clone https://github.com/comfyanonymous/ComfyUI.git $COMFYUI_PATH \
     && cd $COMFYUI_PATH && uv pip install -r requirements.txt
 
+# ── ComfyUI Manager ──────────────────────────────────────────
 RUN git clone https://github.com/ltdrdata/ComfyUI-Manager.git \
     $COMFYUI_PATH/custom_nodes/ComfyUI-Manager \
     && cd $COMFYUI_PATH/custom_nodes/ComfyUI-Manager \
     && uv pip install -r requirements.txt 2>/dev/null || true
+
+# ── Impact Pack ──────────────────────────────────────────────
+RUN git clone https://github.com/ltdrdata/ComfyUI-Impact-Pack.git \
+    $COMFYUI_PATH/custom_nodes/ComfyUI-Impact-Pack \
+    && cd $COMFYUI_PATH/custom_nodes/ComfyUI-Impact-Pack \
+    && uv pip install -r requirements.txt 2>/dev/null || true
+
+# ── KJNodes ──────────────────────────────────────────────────
+RUN git clone https://github.com/kijai/ComfyUI-KJNodes.git \
+    $COMFYUI_PATH/custom_nodes/ComfyUI-KJNodes \
+    && cd $COMFYUI_PATH/custom_nodes/ComfyUI-KJNodes \
+    && uv pip install -r requirements.txt 2>/dev/null || true
+
+# ── UltimateSDUpscale ────────────────────────────────────────
+RUN git clone https://github.com/ssitu/ComfyUI_UltimateSDUpscale.git \
+    $COMFYUI_PATH/custom_nodes/ComfyUI_UltimateSDUpscale
+
+# ── Comfyroll Studio ─────────────────────────────────────────
+RUN git clone https://github.com/Suzie1/ComfyUI_Comfyroll_CustomNodes.git \
+    $COMFYUI_PATH/custom_nodes/ComfyUI_Comfyroll_CustomNodes
+
+# ── ComfyUI Essentials ───────────────────────────────────────
+RUN git clone https://github.com/cubiq/ComfyUI_essentials.git \
+    $COMFYUI_PATH/custom_nodes/ComfyUI_essentials \
+    && cd $COMFYUI_PATH/custom_nodes/ComfyUI_essentials \
+    && uv pip install -r requirements.txt 2>/dev/null || true
+
+# ── ComfyLiterals ────────────────────────────────────────────
+RUN git clone https://github.com/M1kep/ComfyLiterals.git \
+    $COMFYUI_PATH/custom_nodes/ComfyLiterals
+
+# ── JPS Custom Nodes ─────────────────────────────────────────
+RUN git clone https://github.com/JPS-GER/ComfyUI_JPS-Nodes.git \
+    $COMFYUI_PATH/custom_nodes/ComfyUI_JPS-Nodes
 
 RUN mkdir -p \
     $COMFYUI_PATH/models/checkpoints $COMFYUI_PATH/models/vae \
