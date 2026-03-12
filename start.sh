@@ -14,7 +14,7 @@ AUTO_UPDATE=${AUTO_UPDATE:-false}
 ENABLE_JUPYTER=${ENABLE_JUPYTER:-true}
 COMFYUI_EXTRA_ARGS=${COMFYUI_EXTRA_ARGS:-"--listen 0.0.0.0"}
 
-HF_TOKEN="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"
+HF_TOKEN="${HF_TOKEN}"
 
 source $VENV/bin/activate
 
