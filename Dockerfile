@@ -4,7 +4,7 @@ LABEL description="ComfyUI RunPod - CUDA 12.8, Python 3.12, custom nodes"
 
 # ── Clone ComfyUI ────────────────────────────────────────────
 RUN git clone https://github.com/comfyanonymous/ComfyUI.git $COMFYUI_PATH \
-    && cd $COMFYUI_PATH && uv pip install -r requirements.txt
+    && cd $COMFYUI_PATH && uv pip install -r requirements.txt --python $VIRTUAL_ENV/bin/python
 
 # ── Custom nodes ─────────────────────────────────────────────
 RUN git clone https://github.com/ltdrdata/ComfyUI-Manager.git \
