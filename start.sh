@@ -48,6 +48,50 @@ else
     echo ">>> No network volume — models will not persist between restarts!"
 fi
 
+# ── Download models on first boot ────────────────────────────
+echo ">>> Checking models..."
+
+# z_image_turbo_bf16.safetensors → diffusion_models
+DIFFUSION_DIR=$COMFYUI_PATH/models/diffusion_models
+if [ ! -f "$DIFFUSION_DIR/z_image_turbo_bf16.safetensors" ]; then
+    echo ">>> Downloading z_image_turbo_bf16.safetensors (~12GB)..."
+    huggingface-cli download Comfy-Org/z_image_turbo \
+        split_files/diffusion_models/z_image_turbo_bf16.safetensors \
+        --local-dir /tmp/z_image_turbo
+    mv /tmp/z_image_turbo/split_files/diffusion_models/z_image_turbo_bf16.safetensors \
+        $DIFFUSION_DIR/z_image_turbo_bf16.safetensors
+    rm -rf /tmp/z_image_turbo
+else
+    echo ">>> z_image_turbo_bf16.safetensors already exists, skipping"
+fi
+
+# qwen_3_4b.safetensors → text_encoders
+TEXT_ENC_DIR=$COMFYUI_PATH/models/text_encoders
+if [ ! -f "$TEXT_ENC_DIR/qwen_3_4b.safetensors" ]; then
+    echo ">>> Downloading qwen_3_4b.safetensors (~8GB)..."
+    huggingface-cli download Comfy-Org/z_image_turbo \
+        split_files/text_encoders/qwen_3_4b.safetensors \
+        --local-dir /tmp/z_image_turbo_te
+    mv /tmp/z_image_turbo_te/split_files/text_encoders/qwen_3_4b.safetensors \
+        $TEXT_ENC_DIR/qwen_3_4b.safetensors
+    rm -rf /tmp/z_image_turbo_te
+else
+    echo ">>> qwen_3_4b.safetensors already exists, skipping"
+fi
+
+# 4xLSDIR.pth → upscale_models
+UPSCALE_DIR=$COMFYUI_PATH/models/upscale_models
+if [ ! -f "$UPSCALE_DIR/4xLSDIR.pth" ]; then
+    echo ">>> Downloading 4xLSDIR.pth (~67MB)..."
+    huggingface-cli download Chaewon1/upscale_models \
+        4xLSDIR.pth \
+        --local-dir /tmp/upscale
+    mv /tmp/upscale/4xLSDIR.pth $UPSCALE_DIR/4xLSDIR.pth
+    rm -rf /tmp/upscale
+else
+    echo ">>> 4xLSDIR.pth already exists, skipping"
+fi
+
 # ── Auto update ──────────────────────────────────────────────
 if [ "$AUTO_UPDATE" = "true" ]; then
     echo ">>> Updating ComfyUI..."
@@ -58,7 +102,6 @@ if [ "$AUTO_UPDATE" = "true" ]; then
 fi
 
 # ── Custom nodes from env var ────────────────────────────────
-# Set CUSTOM_NODES="https://github.com/xxx/node1,https://github.com/yyy/node2"
 if [ ! -z "$CUSTOM_NODES" ]; then
     echo ">>> Installing custom nodes..."
     IFS=',' read -ra NODES <<< "$CUSTOM_NODES"
@@ -72,39 +115,25 @@ if [ ! -z "$CUSTOM_NODES" ]; then
     done
 fi
 
-# ── Model downloads from env var ─────────────────────────────
-# Set HF_MODELS="org/repo:filename:folder,org/repo2:filename2:vae"
-if [ ! -z "$HF_MODELS" ]; then
-    echo ">>> Downloading HuggingFace models..."
-    IFS=',' read -ra MODELS <<< "$HF_MODELS"
-    for model_entry in "${MODELS[@]}"; do
-        IFS=':' read -ra PARTS <<< "$model_entry"
-        repo="${PARTS[0]}"
-        filename="${PARTS[1]}"
-        dest_folder="${PARTS[2]:-checkpoints}"
-        dest_path="$COMFYUI_PATH/models/$dest_folder/$filename"
-        if [ ! -f "$dest_path" ]; then
-            huggingface-cli download "$repo" "$filename" --local-dir "$COMFYUI_PATH/models/$dest_folder/"
-        fi
-    done
-fi
-
 # ── SSH ──────────────────────────────────────────────────────
 service ssh start 2>/dev/null || /usr/sbin/sshd
 [ ! -z "$SSH_PASSWORD" ] && echo "root:$SSH_PASSWORD" | chpasswd
 
-# ── JupyterLab ───────────────────────────────────────────────
+# ── JupyterLab — NO password/token required ──────────────────
 if [ "$ENABLE_JUPYTER" = "true" ]; then
-    echo ">>> Starting JupyterLab on port $JUPYTER_PORT..."
-    JUPYTER_TOKEN=${JUPYTER_TOKEN:-"comfyui"}
+    echo ">>> Starting JupyterLab on port $JUPYTER_PORT (no auth)..."
     jupyter lab \
         --ip=0.0.0.0 \
         --port=$JUPYTER_PORT \
         --no-browser \
         --allow-root \
-        --NotebookApp.token="$JUPYTER_TOKEN" \
+        --NotebookApp.token='' \
+        --NotebookApp.password='' \
+        --ServerApp.token='' \
+        --ServerApp.password='' \
         --notebook-dir=$WORKSPACE \
         > /var/log/jupyter.log 2>&1 &
+    echo ">>> JupyterLab started — open directly, no token needed"
 fi
 
 # ── ComfyUI ──────────────────────────────────────────────────
