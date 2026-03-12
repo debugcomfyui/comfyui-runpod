@@ -14,6 +14,8 @@ AUTO_UPDATE=${AUTO_UPDATE:-false}
 ENABLE_JUPYTER=${ENABLE_JUPYTER:-true}
 COMFYUI_EXTRA_ARGS=${COMFYUI_EXTRA_ARGS:-"--listen 0.0.0.0"}
 
+HF_TOKEN="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"
+
 source $VENV/bin/activate
 
 # ── Network volume symlinks ──────────────────────────────────
@@ -51,8 +53,12 @@ fi
 # ── Download models on first boot ────────────────────────────
 echo ">>> Checking models..."
 
-# z_image_turbo_bf16.safetensors → diffusion_models
 DIFFUSION_DIR=$COMFYUI_PATH/models/diffusion_models
+TEXT_ENC_DIR=$COMFYUI_PATH/models/text_encoders
+UPSCALE_DIR=$COMFYUI_PATH/models/upscale_models
+LORA_DIR=$COMFYUI_PATH/models/loras
+
+# z_image_turbo_bf16.safetensors
 if [ ! -f "$DIFFUSION_DIR/z_image_turbo_bf16.safetensors" ]; then
     echo ">>> Downloading z_image_turbo_bf16.safetensors (~12GB)..."
     huggingface-cli download Comfy-Org/z_image_turbo \
@@ -65,8 +71,7 @@ else
     echo ">>> z_image_turbo_bf16.safetensors already exists, skipping"
 fi
 
-# qwen_3_4b.safetensors → text_encoders
-TEXT_ENC_DIR=$COMFYUI_PATH/models/text_encoders
+# qwen_3_4b.safetensors
 if [ ! -f "$TEXT_ENC_DIR/qwen_3_4b.safetensors" ]; then
     echo ">>> Downloading qwen_3_4b.safetensors (~8GB)..."
     huggingface-cli download Comfy-Org/z_image_turbo \
@@ -79,8 +84,7 @@ else
     echo ">>> qwen_3_4b.safetensors already exists, skipping"
 fi
 
-# 4xLSDIR.pth → upscale_models
-UPSCALE_DIR=$COMFYUI_PATH/models/upscale_models
+# 4xLSDIR.pth
 if [ ! -f "$UPSCALE_DIR/4xLSDIR.pth" ]; then
     echo ">>> Downloading 4xLSDIR.pth (~67MB)..."
     huggingface-cli download Chaewon1/upscale_models \
@@ -90,6 +94,26 @@ if [ ! -f "$UPSCALE_DIR/4xLSDIR.pth" ]; then
     rm -rf /tmp/upscale
 else
     echo ">>> 4xLSDIR.pth already exists, skipping"
+fi
+
+# Cookie2.safetensors (private repo)
+if [ ! -f "$LORA_DIR/Cookie2.safetensors" ]; then
+    echo ">>> Downloading Cookie2.safetensors..."
+    wget -q --header="Authorization: Bearer ${HF_TOKEN}" \
+        "https://huggingface.co/bombading/ggcook/resolve/main/Cookie2.safetensors" \
+        -O "$LORA_DIR/Cookie2.safetensors"
+else
+    echo ">>> Cookie2.safetensors already exists, skipping"
+fi
+
+# GG.safetensors (private repo)
+if [ ! -f "$LORA_DIR/GG.safetensors" ]; then
+    echo ">>> Downloading GG.safetensors..."
+    wget -q --header="Authorization: Bearer ${HF_TOKEN}" \
+        "https://huggingface.co/bombading/ggcook/resolve/main/GG.safetensors" \
+        -O "$LORA_DIR/GG.safetensors"
+else
+    echo ">>> GG.safetensors already exists, skipping"
 fi
 
 # ── Auto update ──────────────────────────────────────────────
@@ -119,7 +143,7 @@ fi
 service ssh start 2>/dev/null || /usr/sbin/sshd
 [ ! -z "$SSH_PASSWORD" ] && echo "root:$SSH_PASSWORD" | chpasswd
 
-# ── JupyterLab — NO password/token required ──────────────────
+# ── JupyterLab — no auth ─────────────────────────────────────
 if [ "$ENABLE_JUPYTER" = "true" ]; then
     echo ">>> Starting JupyterLab on port $JUPYTER_PORT (no auth)..."
     jupyter lab \
@@ -133,7 +157,6 @@ if [ "$ENABLE_JUPYTER" = "true" ]; then
         --ServerApp.password='' \
         --notebook-dir=$WORKSPACE \
         > /var/log/jupyter.log 2>&1 &
-    echo ">>> JupyterLab started — open directly, no token needed"
 fi
 
 # ── ComfyUI ──────────────────────────────────────────────────
