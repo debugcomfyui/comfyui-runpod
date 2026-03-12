@@ -36,3 +36,4 @@ jobs:
           cache-to: type=gha,mode=max,scope=base
 
       - run: echo "✅ Base image pushed: senseiai/comfyui-base:latest"
+
