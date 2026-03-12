@@ -12,9 +12,8 @@ services:
       - ./runpod-volume:/runpod-volume
     environment:
       - ENABLE_JUPYTER=true
-      - JUPYTER_TOKEN=comfyui
-      - AUTO_UPDATE=false
       - SSH_PASSWORD=password123
+      - HF_TOKEN=${HF_TOKEN}
     deploy:
       resources:
         reservations:
