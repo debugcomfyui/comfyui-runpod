@@ -14,11 +14,10 @@ AUTO_UPDATE=${AUTO_UPDATE:-false}
 ENABLE_JUPYTER=${ENABLE_JUPYTER:-true}
 COMFYUI_EXTRA_ARGS=${COMFYUI_EXTRA_ARGS:-"--listen 0.0.0.0"}
 
-HF_TOKEN="${HF_TOKEN}"
-
 source $VENV/bin/activate
+export PATH="$VENV/bin:$PATH"
 
-# ── Network volume symlinks ──────────────────────────────────
+# ── Network volume symlinks ───────────────────────────────────
 if [ -d "/runpod-volume" ]; then
     echo ">>> Network volume detected, symlinking model dirs..."
     mkdir -p \
@@ -58,7 +57,6 @@ TEXT_ENC_DIR=$COMFYUI_PATH/models/text_encoders
 UPSCALE_DIR=$COMFYUI_PATH/models/upscale_models
 LORA_DIR=$COMFYUI_PATH/models/loras
 
-# z_image_turbo_bf16.safetensors
 if [ ! -f "$DIFFUSION_DIR/z_image_turbo_bf16.safetensors" ]; then
     echo ">>> Downloading z_image_turbo_bf16.safetensors (~12GB)..."
     $VENV/bin/huggingface-cli download Comfy-Org/z_image_turbo \
@@ -71,7 +69,6 @@ else
     echo ">>> z_image_turbo_bf16.safetensors already exists, skipping"
 fi
 
-# qwen_3_4b.safetensors
 if [ ! -f "$TEXT_ENC_DIR/qwen_3_4b.safetensors" ]; then
     echo ">>> Downloading qwen_3_4b.safetensors (~8GB)..."
     $VENV/bin/huggingface-cli download Comfy-Org/z_image_turbo \
@@ -84,7 +81,6 @@ else
     echo ">>> qwen_3_4b.safetensors already exists, skipping"
 fi
 
-# 4xLSDIR.pth
 if [ ! -f "$UPSCALE_DIR/4xLSDIR.pth" ]; then
     echo ">>> Downloading 4xLSDIR.pth (~67MB)..."
     $VENV/bin/huggingface-cli download Chaewon1/upscale_models \
@@ -96,27 +92,33 @@ else
     echo ">>> 4xLSDIR.pth already exists, skipping"
 fi
 
-# Cookie2.safetensors (private repo)
 if [ ! -f "$LORA_DIR/Cookie2.safetensors" ]; then
-    echo ">>> Downloading Cookie2.safetensors..."
-    wget -q --header="Authorization: Bearer ${HF_TOKEN}" \
-        "https://huggingface.co/bombading/ggcook/resolve/main/Cookie2.safetensors" \
-        -O "$LORA_DIR/Cookie2.safetensors"
+    if [ -z "$HF_TOKEN" ]; then
+        echo ">>> WARNING: HF_TOKEN not set, skipping Cookie2.safetensors"
+    else
+        echo ">>> Downloading Cookie2.safetensors..."
+        wget --header="Authorization: Bearer ${HF_TOKEN}" \
+            "https://huggingface.co/bombading/ggcook/resolve/main/Cookie2.safetensors" \
+            -O "$LORA_DIR/Cookie2.safetensors" || echo ">>> WARNING: Cookie2 download failed"
+    fi
 else
     echo ">>> Cookie2.safetensors already exists, skipping"
 fi
 
-# GG.safetensors (private repo)
 if [ ! -f "$LORA_DIR/GG.safetensors" ]; then
-    echo ">>> Downloading GG.safetensors..."
-    wget -q --header="Authorization: Bearer ${HF_TOKEN}" \
-        "https://huggingface.co/bombading/ggcook/resolve/main/GG.safetensors" \
-        -O "$LORA_DIR/GG.safetensors"
+    if [ -z "$HF_TOKEN" ]; then
+        echo ">>> WARNING: HF_TOKEN not set, skipping GG.safetensors"
+    else
+        echo ">>> Downloading GG.safetensors..."
+        wget --header="Authorization: Bearer ${HF_TOKEN}" \
+            "https://huggingface.co/bombading/ggcook/resolve/main/GG.safetensors" \
+            -O "$LORA_DIR/GG.safetensors" || echo ">>> WARNING: GG download failed"
+    fi
 else
     echo ">>> GG.safetensors already exists, skipping"
 fi
 
-# ── Auto update ──────────────────────────────────────────────
+# ── Auto update ───────────────────────────────────────────────
 if [ "$AUTO_UPDATE" = "true" ]; then
     echo ">>> Updating ComfyUI..."
     cd $COMFYUI_PATH && git pull origin master
@@ -139,11 +141,11 @@ if [ ! -z "$CUSTOM_NODES" ]; then
     done
 fi
 
-# ── SSH ──────────────────────────────────────────────────────
+# ── SSH ───────────────────────────────────────────────────────
 service ssh start 2>/dev/null || /usr/sbin/sshd
 [ ! -z "$SSH_PASSWORD" ] && echo "root:$SSH_PASSWORD" | chpasswd
 
-# ── JupyterLab — no auth ─────────────────────────────────────
+# ── JupyterLab — no auth ──────────────────────────────────────
 if [ "$ENABLE_JUPYTER" = "true" ]; then
     echo ">>> Starting JupyterLab on port $JUPYTER_PORT (no auth)..."
     jupyter lab \
@@ -159,7 +161,7 @@ if [ "$ENABLE_JUPYTER" = "true" ]; then
         > /var/log/jupyter.log 2>&1 &
 fi
 
-# ── ComfyUI ──────────────────────────────────────────────────
+# ── ComfyUI ───────────────────────────────────────────────────
 echo ">>> Starting ComfyUI on port $COMFYUI_PORT..."
 cd $COMFYUI_PATH
 exec python main.py --port $COMFYUI_PORT $COMFYUI_EXTRA_ARGS

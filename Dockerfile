@@ -4,23 +4,23 @@ LABEL description="ComfyUI RunPod - CUDA 12.8, Python 3.12, custom nodes"
 
 # ── Clone ComfyUI ────────────────────────────────────────────
 RUN git clone https://github.com/comfyanonymous/ComfyUI.git $COMFYUI_PATH \
-    && cd $COMFYUI_PATH && uv pip install -r requirements.txt --python $VIRTUAL_ENV/bin/python
+    && cd $COMFYUI_PATH && uv pip install --python $VIRTUAL_ENV/bin/python -r requirements.txt
 
 # ── Custom nodes ─────────────────────────────────────────────
 RUN git clone https://github.com/ltdrdata/ComfyUI-Manager.git \
     $COMFYUI_PATH/custom_nodes/ComfyUI-Manager \
     && cd $COMFYUI_PATH/custom_nodes/ComfyUI-Manager \
-    && uv pip install -r requirements.txt 2>/dev/null || true
+    && uv pip install --python $VIRTUAL_ENV/bin/python -r requirements.txt 2>/dev/null || true
 
 RUN git clone https://github.com/ltdrdata/ComfyUI-Impact-Pack.git \
     $COMFYUI_PATH/custom_nodes/ComfyUI-Impact-Pack \
     && cd $COMFYUI_PATH/custom_nodes/ComfyUI-Impact-Pack \
-    && uv pip install -r requirements.txt 2>/dev/null || true
+    && uv pip install --python $VIRTUAL_ENV/bin/python -r requirements.txt 2>/dev/null || true
 
 RUN git clone https://github.com/kijai/ComfyUI-KJNodes.git \
     $COMFYUI_PATH/custom_nodes/ComfyUI-KJNodes \
     && cd $COMFYUI_PATH/custom_nodes/ComfyUI-KJNodes \
-    && uv pip install -r requirements.txt 2>/dev/null || true
+    && uv pip install --python $VIRTUAL_ENV/bin/python -r requirements.txt 2>/dev/null || true
 
 RUN git clone https://github.com/ssitu/ComfyUI_UltimateSDUpscale.git \
     $COMFYUI_PATH/custom_nodes/ComfyUI_UltimateSDUpscale
@@ -31,7 +31,7 @@ RUN git clone https://github.com/Suzie1/ComfyUI_Comfyroll_CustomNodes.git \
 RUN git clone https://github.com/cubiq/ComfyUI_essentials.git \
     $COMFYUI_PATH/custom_nodes/ComfyUI_essentials \
     && cd $COMFYUI_PATH/custom_nodes/ComfyUI_essentials \
-    && uv pip install -r requirements.txt 2>/dev/null || true
+    && uv pip install --python $VIRTUAL_ENV/bin/python -r requirements.txt 2>/dev/null || true
 
 RUN git clone https://github.com/M1kep/ComfyLiterals.git \
     $COMFYUI_PATH/custom_nodes/ComfyLiterals
