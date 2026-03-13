@@ -59,35 +59,27 @@ LORA_DIR=$COMFYUI_PATH/models/loras
 
 if [ ! -f "$DIFFUSION_DIR/z_image_turbo_bf16.safetensors" ]; then
     echo ">>> Downloading z_image_turbo_bf16.safetensors (~12GB)..."
-    python -m huggingface_hub download Comfy-Org/z_image_turbo \
-        split_files/diffusion_models/z_image_turbo_bf16.safetensors \
-        --local-dir /tmp/z_image_turbo
-    mv /tmp/z_image_turbo/split_files/diffusion_models/z_image_turbo_bf16.safetensors \
-        $DIFFUSION_DIR/z_image_turbo_bf16.safetensors
-    rm -rf /tmp/z_image_turbo
+    wget -q --show-progress \
+        "https://huggingface.co/Comfy-Org/z_image_turbo/resolve/main/split_files/diffusion_models/z_image_turbo_bf16.safetensors" \
+        -O "$DIFFUSION_DIR/z_image_turbo_bf16.safetensors"
 else
     echo ">>> z_image_turbo_bf16.safetensors already exists, skipping"
 fi
 
 if [ ! -f "$TEXT_ENC_DIR/qwen_3_4b.safetensors" ]; then
     echo ">>> Downloading qwen_3_4b.safetensors (~8GB)..."
-    python -m huggingface_hub download Comfy-Org/z_image_turbo \
-        split_files/text_encoders/qwen_3_4b.safetensors \
-        --local-dir /tmp/z_image_turbo_te
-    mv /tmp/z_image_turbo_te/split_files/text_encoders/qwen_3_4b.safetensors \
-        $TEXT_ENC_DIR/qwen_3_4b.safetensors
-    rm -rf /tmp/z_image_turbo_te
+    wget -q --show-progress \
+        "https://huggingface.co/Comfy-Org/z_image_turbo/resolve/main/split_files/text_encoders/qwen_3_4b.safetensors" \
+        -O "$TEXT_ENC_DIR/qwen_3_4b.safetensors"
 else
     echo ">>> qwen_3_4b.safetensors already exists, skipping"
 fi
 
 if [ ! -f "$UPSCALE_DIR/4xLSDIR.pth" ]; then
     echo ">>> Downloading 4xLSDIR.pth (~67MB)..."
-    python -m huggingface_hub download Chaewon1/upscale_models \
-        4xLSDIR.pth \
-        --local-dir /tmp/upscale
-    mv /tmp/upscale/4xLSDIR.pth $UPSCALE_DIR/4xLSDIR.pth
-    rm -rf /tmp/upscale
+    wget -q --show-progress \
+        "https://huggingface.co/Chaewon1/upscale_models/resolve/main/4xLSDIR.pth" \
+        -O "$UPSCALE_DIR/4xLSDIR.pth"
 else
     echo ">>> 4xLSDIR.pth already exists, skipping"
 fi
