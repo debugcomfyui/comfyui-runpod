@@ -7,13 +7,10 @@ echo "================================================"
 
 WORKSPACE=${WORKSPACE:-/workspace}
 COMFYUI_PATH=${COMFYUI_PATH:-/workspace/ComfyUI}
-VENV=/opt/venv
 COMFYUI_PORT=${COMFYUI_PORT:-8188}
 JUPYTER_PORT=${JUPYTER_PORT:-8888}
-AUTO_UPDATE=${AUTO_UPDATE:-false}
 ENABLE_JUPYTER=${ENABLE_JUPYTER:-true}
 COMFYUI_EXTRA_ARGS=${COMFYUI_EXTRA_ARGS:-"--listen 0.0.0.0"}
-
 
 # ── Network volume symlinks ───────────────────────────────────
 if [ -d "/runpod-volume" ]; then
@@ -54,7 +51,11 @@ DIFFUSION_DIR=$COMFYUI_PATH/models/diffusion_models
 TEXT_ENC_DIR=$COMFYUI_PATH/models/text_encoders
 UPSCALE_DIR=$COMFYUI_PATH/models/upscale_models
 LORA_DIR=$COMFYUI_PATH/models/loras
+VAE_DIR=$COMFYUI_PATH/models/vae
 
+mkdir -p $VAE_DIR
+
+# z_image_turbo
 if [ ! -f "$DIFFUSION_DIR/z_image_turbo_bf16.safetensors" ]; then
     echo ">>> Downloading z_image_turbo_bf16.safetensors (~12GB)..."
     wget -q --show-progress \
@@ -82,6 +83,79 @@ else
     echo ">>> 4xLSDIR.pth already exists, skipping"
 fi
 
+# ae.safetensors (flux1 VAE)
+if [ ! -f "$VAE_DIR/ae.safetensors" ]; then
+    echo ">>> Downloading ae.safetensors (~335MB)..."
+    wget -q --show-progress \
+        "https://huggingface.co/Comfy-Org/z_image_turbo/resolve/main/split_files/vae/ae.safetensors" \
+        -O "$VAE_DIR/ae.safetensors"
+else
+    echo ">>> ae.safetensors already exists, skipping"
+fi
+
+# flux2-vae.safetensors
+if [ ! -f "$VAE_DIR/flux2-vae.safetensors" ]; then
+    echo ">>> Downloading flux2-vae.safetensors (~336MB)..."
+    wget -q --show-progress \
+        "https://huggingface.co/Comfy-Org/flux2-klein-9B/resolve/main/split_files/vae/flux2-vae.safetensors" \
+        -O "$VAE_DIR/flux2-vae.safetensors"
+else
+    echo ">>> flux2-vae.safetensors already exists, skipping"
+fi
+
+# flux2 klein 9B (gated — needs HF_TOKEN + accepted license on HF)
+if [ ! -f "$DIFFUSION_DIR/flux-2-klein-base-9b-fp8.safetensors" ]; then
+    if [ -z "$HF_TOKEN" ]; then
+        echo ">>> WARNING: HF_TOKEN not set, skipping flux-2-klein-base-9b-fp8"
+    else
+        echo ">>> Downloading flux-2-klein-base-9b-fp8.safetensors (~9GB)..."
+        wget --header="Authorization: Bearer ${HF_TOKEN}" \
+            "https://huggingface.co/black-forest-labs/FLUX.2-klein-base-9b-fp8/resolve/main/flux-2-klein-base-9b-fp8.safetensors" \
+            -O "$DIFFUSION_DIR/flux-2-klein-base-9b-fp8.safetensors" || echo ">>> WARNING: flux2 klein download failed (accept license on huggingface.co first)"
+    fi
+else
+    echo ">>> flux-2-klein-base-9b-fp8.safetensors already exists, skipping"
+fi
+
+# qwen 3 8b fp8 text encoder (for flux2 klein 9B)
+if [ ! -f "$TEXT_ENC_DIR/qwen_3_8b_fp8mixed.safetensors" ]; then
+    echo ">>> Downloading qwen_3_8b_fp8mixed.safetensors (~8.6GB)..."
+    wget -q --show-progress \
+        "https://huggingface.co/Comfy-Org/flux2-klein-9B/resolve/main/split_files/text_encoders/qwen_3_8b_fp8mixed.safetensors" \
+        -O "$TEXT_ENC_DIR/qwen_3_8b_fp8mixed.safetensors"
+else
+    echo ">>> qwen_3_8b_fp8mixed.safetensors already exists, skipping"
+fi
+
+# Qwen Image Edit 2511 fp8
+if [ ! -f "$DIFFUSION_DIR/qwen_image_edit_fp8_e4m3fn.safetensors" ]; then
+    echo ">>> Downloading qwen_image_edit_fp8_e4m3fn.safetensors..."
+    wget -q --show-progress \
+        "https://huggingface.co/Comfy-Org/Qwen-Image-Edit_ComfyUI/resolve/main/split_files/diffusion_models/qwen_image_edit_fp8_e4m3fn.safetensors" \
+        -O "$DIFFUSION_DIR/qwen_image_edit_fp8_e4m3fn.safetensors"
+else
+    echo ">>> qwen_image_edit_fp8_e4m3fn.safetensors already exists, skipping"
+fi
+
+if [ ! -f "$TEXT_ENC_DIR/qwen_2.5_vl_7b_fp8_scaled.safetensors" ]; then
+    echo ">>> Downloading qwen_2.5_vl_7b_fp8_scaled.safetensors..."
+    wget -q --show-progress \
+        "https://huggingface.co/Comfy-Org/Qwen-Image_ComfyUI/resolve/main/split_files/text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors" \
+        -O "$TEXT_ENC_DIR/qwen_2.5_vl_7b_fp8_scaled.safetensors"
+else
+    echo ">>> qwen_2.5_vl_7b_fp8_scaled.safetensors already exists, skipping"
+fi
+
+if [ ! -f "$VAE_DIR/qwen_image_vae.safetensors" ]; then
+    echo ">>> Downloading qwen_image_vae.safetensors..."
+    wget -q --show-progress \
+        "https://huggingface.co/Comfy-Org/Qwen-Image_ComfyUI/resolve/main/split_files/vae/qwen_image_vae.safetensors" \
+        -O "$VAE_DIR/qwen_image_vae.safetensors"
+else
+    echo ">>> qwen_image_vae.safetensors already exists, skipping"
+fi
+
+# Private loras
 if [ ! -f "$LORA_DIR/Cookie2.safetensors" ]; then
     if [ -z "$HF_TOKEN" ]; then
         echo ">>> WARNING: HF_TOKEN not set, skipping Cookie2.safetensors"
@@ -106,13 +180,6 @@ if [ ! -f "$LORA_DIR/GG.safetensors" ]; then
     fi
 else
     echo ">>> GG.safetensors already exists, skipping"
-fi
-
-# ── Auto update ───────────────────────────────────────────────
-if [ "$AUTO_UPDATE" = "true" ]; then
-    echo ">>> Updating ComfyUI..."
-    cd $COMFYUI_PATH && git pull origin master
-    uv pip install -r requirements.txt --quiet
 fi
 
 # ── SSH ───────────────────────────────────────────────────────

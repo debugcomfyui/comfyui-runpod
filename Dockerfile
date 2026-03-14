@@ -44,6 +44,12 @@ RUN git clone --depth=1 https://github.com/ltdrdata/ComfyUI-Manager.git \
         $COMFYUI_PATH/custom_nodes/ComfyLiterals \
     && git clone --depth=1 https://github.com/JPS-GER/ComfyUI_JPS-Nodes.git \
         $COMFYUI_PATH/custom_nodes/ComfyUI_JPS-Nodes \
+    && git clone --depth=1 https://github.com/BigStationW/ComfyUi-Scale-Image-to-Total-Pixels-Advanced.git \
+        $COMFYUI_PATH/custom_nodes/ComfyUi-Scale-Image-to-Total-Pixels-Advanced \
+    && git clone --depth=1 https://github.com/BigStationW/Comfyui-AD-Image-Concatenation-Advanced.git \
+        $COMFYUI_PATH/custom_nodes/Comfyui-AD-Image-Concatenation-Advanced \
+    && git clone --depth=1 https://github.com/BigStationW/ComfyUi-TextEncodeEditAdvanced.git \
+        $COMFYUI_PATH/custom_nodes/ComfyUi-TextEncodeEditAdvanced \
     && for node in ComfyUI-Manager ComfyUI-Impact-Pack ComfyUI-KJNodes ComfyUI_essentials; do \
         [ -f $COMFYUI_PATH/custom_nodes/$node/requirements.txt ] \
         && uv pip install --system -r $COMFYUI_PATH/custom_nodes/$node/requirements.txt 2>/dev/null || true; \
