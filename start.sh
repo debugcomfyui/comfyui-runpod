@@ -128,13 +128,13 @@ else
 fi
 
 # Qwen Image Edit 2511 fp8
-if [ ! -f "$DIFFUSION_DIR/qwen_image_edit_fp8_e4m3fn.safetensors" ]; then
-    echo ">>> Downloading qwen_image_edit_fp8_e4m3fn.safetensors..."
+if [ ! -f "$DIFFUSION_DIR/qwen_image_edit_2511_fp8mixed.safetensors" ]; then
+    echo ">>> Downloading qwen_image_edit_2511_fp8mixed.safetensors..."
     wget -q --show-progress \
-        "https://huggingface.co/Comfy-Org/Qwen-Image-Edit_ComfyUI/resolve/main/split_files/diffusion_models/qwen_image_edit_fp8_e4m3fn.safetensors" \
-        -O "$DIFFUSION_DIR/qwen_image_edit_fp8_e4m3fn.safetensors"
+        "https://huggingface.co/Comfy-Org/Qwen-Image-Edit_ComfyUI/resolve/main/split_files/diffusion_models/qwen_image_edit_2511_fp8mixed.safetensors" \
+        -O "$DIFFUSION_DIR/qwen_image_edit_2511_fp8mixed.safetensors"
 else
-    echo ">>> qwen_image_edit_fp8_e4m3fn.safetensors already exists, skipping"
+    echo ">>> qwen_image_edit_2511_fp8mixed.safetensors already exists, skipping"
 fi
 
 if [ ! -f "$TEXT_ENC_DIR/qwen_2.5_vl_7b_fp8_scaled.safetensors" ]; then
@@ -180,6 +180,44 @@ if [ ! -f "$LORA_DIR/GG.safetensors" ]; then
     fi
 else
     echo ">>> GG.safetensors already exists, skipping"
+fi
+
+
+# ── Qwen Image Edit 2511 Lightning 4-step LoRA ────────────────
+if [ ! -f "$LORA_DIR/Qwen-Image-Edit-2511-Lightning-4steps-V1.0-bf16.safetensors" ]; then
+    echo ">>> Downloading Qwen-Image-Edit-2511 Lightning 4-step LoRA (~850MB)..."
+    wget -q --show-progress \
+        "https://huggingface.co/lightx2v/Qwen-Image-Edit-2511-Lightning/resolve/main/Qwen-Image-Edit-2511-Lightning-4steps-V1.0-bf16.safetensors" \
+        -O "$LORA_DIR/Qwen-Image-Edit-2511-Lightning-4steps-V1.0-bf16.safetensors"
+else
+    echo ">>> Qwen-Image-Edit-2511 Lightning LoRA already exists, skipping"
+fi
+
+# ── Workflows ─────────────────────────────────────────────────
+WORKFLOW_DIR=$COMFYUI_PATH/user/default/workflows
+mkdir -p $WORKFLOW_DIR
+
+if [ -z "$HF_TOKEN" ]; then
+    echo ">>> WARNING: HF_TOKEN not set, skipping private workflows"
+else
+    if [ ! -f "$WORKFLOW_DIR/Freckles.json" ]; then
+        echo ">>> Downloading Freckles.json workflow..."
+        wget --header="Authorization: Bearer ${HF_TOKEN}" \
+            "https://huggingface.co/bombading/ggcook/resolve/main/Freckles.json" \
+            -O "$WORKFLOW_DIR/Freckles.json" || echo ">>> WARNING: Freckles.json download failed"
+    fi
+    if [ ! -f "$WORKFLOW_DIR/NewGG.json" ]; then
+        echo ">>> Downloading NewGG.json workflow..."
+        wget --header="Authorization: Bearer ${HF_TOKEN}" \
+            "https://huggingface.co/bombading/ggcook/resolve/main/NewGG.json" \
+            -O "$WORKFLOW_DIR/NewGG.json" || echo ">>> WARNING: NewGG.json download failed"
+    fi
+    if [ ! -f "$WORKFLOW_DIR/workflow_Flux2_Klein_9b.json" ]; then
+        echo ">>> Downloading workflow_Flux2_Klein_9b.json workflow..."
+        wget --header="Authorization: Bearer ${HF_TOKEN}" \
+            "https://huggingface.co/bombading/ggcook/resolve/main/workflow_Flux2_Klein_9b%20(1).json" \
+            -O "$WORKFLOW_DIR/workflow_Flux2_Klein_9b.json" || echo ">>> WARNING: Flux2 Klein workflow download failed"
+    fi
 fi
 
 # ── SSH ───────────────────────────────────────────────────────
