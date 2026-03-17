@@ -200,23 +200,23 @@ mkdir -p $WORKFLOW_DIR
 if [ -z "$HF_TOKEN" ]; then
     echo ">>> WARNING: HF_TOKEN not set, skipping private workflows"
 else
-    if [ ! -f "$WORKFLOW_DIR/Freckles.json" ]; then
-        echo ">>> Downloading Freckles.json workflow..."
-        wget --header="Authorization: Bearer ${HF_TOKEN}" \
-            "https://huggingface.co/bombading/ggcook/resolve/main/Freckles.json" \
-            -O "$WORKFLOW_DIR/Freckles.json" || echo ">>> WARNING: Freckles.json download failed"
-    fi
     if [ ! -f "$WORKFLOW_DIR/NewGG.json" ]; then
         echo ">>> Downloading NewGG.json workflow..."
         wget --header="Authorization: Bearer ${HF_TOKEN}" \
-            "https://huggingface.co/bombading/ggcook/resolve/main/NewGG.json" \
+            "https://huggingface.co/bombading/ggcook/resolve/main/NewGG%20(2).json" \
             -O "$WORKFLOW_DIR/NewGG.json" || echo ">>> WARNING: NewGG.json download failed"
     fi
-    if [ ! -f "$WORKFLOW_DIR/workflow_Flux2_Klein_9b.json" ]; then
-        echo ">>> Downloading workflow_Flux2_Klein_9b.json workflow..."
+    if [ ! -f "$WORKFLOW_DIR/Ruski.json" ]; then
+        echo ">>> Downloading Ruski.json workflow..."
         wget --header="Authorization: Bearer ${HF_TOKEN}" \
-            "https://huggingface.co/bombading/ggcook/resolve/main/workflow_Flux2_Klein_9b%20(1).json" \
-            -O "$WORKFLOW_DIR/workflow_Flux2_Klein_9b.json" || echo ">>> WARNING: Flux2 Klein workflow download failed"
+            "https://huggingface.co/bombading/ggcook/resolve/main/Ruski%20(copy).json" \
+            -O "$WORKFLOW_DIR/Ruski.json" || echo ">>> WARNING: Ruski.json download failed"
+    fi
+    if [ ! -f "$WORKFLOW_DIR/Qwen_image_edit.json" ]; then
+        echo ">>> Downloading Qwen_image_edit.json workflow..."
+        wget --header="Authorization: Bearer ${HF_TOKEN}" \
+            "https://huggingface.co/bombading/ggcook/resolve/main/Qwen_image_edit.json" \
+            -O "$WORKFLOW_DIR/Qwen_image_edit.json" || echo ">>> WARNING: Qwen_image_edit.json download failed"
     fi
 fi
 
