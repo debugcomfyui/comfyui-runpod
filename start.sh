@@ -220,6 +220,32 @@ else
     fi
 fi
 
+
+if [ ! -f "$LORA_DIR/Soph.safetensors" ]; then
+    if [ -z "$HF_TOKEN" ]; then
+        echo ">>> WARNING: HF_TOKEN not set, skipping Soph.safetensors"
+    else
+        echo ">>> Downloading Soph.safetensors..."
+        wget --header="Authorization: Bearer ${HF_TOKEN}" \
+            "https://huggingface.co/bombading/sbs/resolve/main/Soph.safetensors" \
+            -O "$LORA_DIR/Soph.safetensors" || echo ">>> WARNING: Soph.safetensors download failed"
+    fi
+else
+    echo ">>> Soph.safetensors already exists, skipping"
+fi
+
+if [ ! -f "$LORA_DIR/bruinehaar.safetensors" ]; then
+    if [ -z "$HF_TOKEN" ]; then
+        echo ">>> WARNING: HF_TOKEN not set, skipping bruinehaar.safetensors"
+    else
+        echo ">>> Downloading bruinehaar.safetensors..."
+        wget --header="Authorization: Bearer ${HF_TOKEN}" \
+            "https://huggingface.co/bombading/sbs/resolve/main/bruinehaar.safetensors" \
+            -O "$LORA_DIR/bruinehaar.safetensors" || echo ">>> WARNING: bruinehaar.safetensors download failed"
+    fi
+else
+    echo ">>> bruinehaar.safetensors already exists, skipping"
+fi
 # ── SSH ───────────────────────────────────────────────────────
 service ssh start 2>/dev/null || /usr/sbin/sshd
 [ ! -z "$SSH_PASSWORD" ] && echo "root:$SSH_PASSWORD" | chpasswd
